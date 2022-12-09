@@ -1,0 +1,20 @@
+{
+  "sessions": [
+    {
+      "title": "session 1",
+      "lessonMaterials": [
+        {
+          "title": "Judul 1",
+          "isRequired": true,
+          "isPreviewable": true,
+          "type": "video",
+          "duration": {
+            "hour": 0,
+            "minute": 6,
+            "second": 30
+          }
+        }
+      ]
+    }
+  ]
+}

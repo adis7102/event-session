@@ -1,7 +1,6 @@
 const initialState = {
   loading: false,
-  error: '',
-  dataCSR: []
+  listData: []
 }
 
 export default (state = initialState, action) => {
@@ -13,15 +12,10 @@ export default (state = initialState, action) => {
         ...state,
         loading: action?.loading
       }
-    case "ERROR":
-      return {
-        ...state,
-        error: action?.error
-      }
     case "GET_LIST_DATA":
       return {
         ...state,
-        dataCSR: action?.dataCSR
+        listData: action?.listData
       }
     default:
       return state
