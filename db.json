@@ -1,28 +1,26 @@
 {
   "sessions": [
     {
-      "id": 1,
-      "title": "session test edit",
+      "title": "1",
       "lessonMaterials": [
         {
-          "title": "asdwa",
+          "title": "asdawd",
           "isRequired": "true",
-          "isDownloadable": false,
+          "isDownloadable": "true",
           "type": "video",
-          "date": "2022-12-11T16:02",
+          "date": "2022-12-20T22:05",
           "duration": {
             "hour": null,
-            "minute": null,
+            "minute": "11",
             "second": null
           }
         },
         {
-          "title": "asdawd",
+          "title": "asdaswd1",
           "isRequired": "true",
-          "isPreviewable": "true",
           "isDownloadable": "true",
           "type": "video",
-          "date": "2022-12-18T16:13",
+          "date": "2022-12-13T22:05",
           "duration": {
             "hour": null,
             "minute": "10",
@@ -30,19 +28,42 @@
           }
         },
         {
-          "title": "asdwa",
+          "title": "asdawd",
           "isRequired": "true",
-          "isPreviewable": "true",
           "isDownloadable": "true",
           "type": "video",
-          "date": "2022-12-11T16:14",
+          "date": "2022-12-11T22:05",
           "duration": {
-            "hour": "01",
-            "minute": null,
+            "hour": null,
+            "minute": "10",
             "second": null
           }
         }
-      ]
+      ],
+      "id": 1
+    },
+    {
+      "title": "2",
+      "lessonMaterials": [
+        {
+          "title": "asdaw",
+          "isRequired": "true",
+          "isDownloadable": "false",
+          "type": "video",
+          "date": "2022-12-11T22:32",
+          "duration": {
+            "hour": null,
+            "minute": "10",
+            "second": null
+          }
+        }
+      ],
+      "id": 2
+    },
+    {
+      "title": "3",
+      "lessonMaterials": [],
+      "id": 3
     }
   ]
 }

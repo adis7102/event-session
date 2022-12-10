@@ -1,9 +1,14 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import dayjs from "dayjs";
 
 import { useSelector, useDispatch } from "react-redux";
 
-import { getListData, addData, editData, deleteData } from "../../store/actions/index.js";
+import {
+  getListData,
+  addData,
+  editData,
+  deleteData,
+} from "../../store/actions/index.js";
 import {
   URL,
   lessonType,
@@ -21,6 +26,7 @@ import DatePicker from "../../components/DatePicker";
 import Duration from "../../components/Duration";
 import ErrorMessage from "../../components/ErrorMessage/index.jsx";
 import DeleteOverlay from "../../components/DeleteOverlay/index.jsx";
+import Sortable from "../../components/Sortable/index.jsx";
 
 import Pencil from "../../assets/icon-images/pencil.png";
 import Plus from "../../assets/icon-images/plus.png";
@@ -42,15 +48,40 @@ const EventSession = () => {
 
   const { loading, listData } = useSelector((state) => state);
 
+  const [listSession, setListSession] = useState([]);
+  const [listLesson, setListLesson] = useState({});
   const [showAddModal, setShowAddModal] = useState(false);
   const [dataForm, setDataForm] = useState({});
   const [sessionId, setSessionId] = useState(null);
   const [error, setError] = useState(null);
   const [optionActive, setOptionActive] = useState({});
 
+  const dragSessionItem = useRef(null);
+  const dragOverSessionItem = useRef(null);
+  const listlessonRef = useRef({});
+  const listLessonCallBack = useCallback(node => {
+    if (node !== null) {
+      const { id, sortedList } = node || {};
+
+      listlessonRef.current[id] = sortedList;
+      setListLesson(listlessonRef.current)
+    }
+  },[listlessonRef]);
+  const dragLessonItem = useRef(null);
+  const dragOverLessonItem = useRef(null);
+
   useEffect(() => {
     dispatch(getListData(URL));
   }, []);
+
+  useEffect(() => {
+    if (listData) {
+      setListSession(listData);
+    }
+  }, [listData]);
+
+  console.log(listlessonRef?.current?.[1], 'listlessonRef')
+  console.log(listLesson, 'listLesson')
 
   const handleInput = (e) => {
     const { value, name } = e.target;
@@ -97,18 +128,14 @@ const EventSession = () => {
       setError(validate);
     } else {
       if (showAddModal?.type === "session") {
-        dispatch(
-          editData(URL, dataForm?.id, dataForm)
-        );
+        dispatch(editData(URL, dataForm?.id, dataForm));
       } else {
         const findItem = listData.find((el) => el.id === sessionId);
         const cloneContent = JSON.parse(JSON.stringify(findItem));
 
         cloneContent.lessonMaterials.push(dataForm);
 
-        dispatch(
-          editData(URL, sessionId, cloneContent)
-        );
+        dispatch(editData(URL, sessionId, cloneContent));
       }
 
       handleCloseAddModal();
@@ -143,33 +170,36 @@ const EventSession = () => {
   };
 
   const handleOpenOptionActive = (type, id) => {
-    if(type === optionActive.type && id === optionActive.id) {
-      setOptionActive({})
-      setSessionId(null)
+    if (type === optionActive.type && id === optionActive.id) {
+      setOptionActive({});
+      setSessionId(null);
     } else {
       setOptionActive({
         type,
-        id
+        id,
       });
     }
-  }
+  };
 
   const handleDelete = (type, id) => {
-    if(type === 'session') {
-      dispatch(
-        deleteData(URL, id)
-      )
+    if (type === "session") {
+      dispatch(deleteData(URL, id));
     } else {
       const findItem = listData.find((el) => el.id === sessionId);
       const cloneContent = JSON.parse(JSON.stringify(findItem));
 
       cloneContent.lessonMaterials.splice(id, 1);
 
-      dispatch(
-        editData(URL, sessionId, cloneContent)
-      );
+      dispatch(editData(URL, sessionId, cloneContent));
     }
-  }
+
+    setOptionActive({});
+    setSessionId(null);
+  };
+  
+  // const handleSortedLesson = (index, sortedList) => {
+  //   listLessonRef.current[index] = []
+  // }
 
   return (
     <div className="event-session">
@@ -198,116 +228,158 @@ const EventSession = () => {
           </div>
           {!loading ? (
             <>
-              {(listData || []).map((item, index) => {
+              {(listSession || []).map((item, index) => {
                 const { id, title, lessonMaterials } = item || {};
 
-                return (
-                  <div key={index} className="event-session-container">
-                    {(optionActive.type === "session" && optionActive.id === id) && (<DeleteOverlay onClick={() => handleDelete('session', id)} />)}
-                    <div className="event-session-container-title">
-                      <div className="left-wrap">
-                        <Dots type="vertical" />
-                        <p className="session-title">{title}</p>
-                        <img
-                          onClick={() => handleOpenEdit(id)}
-                          src={Pencil}
-                          alt="pencil"
-                        />
-                      </div>
-                      <div onClick={() => handleOpenOptionActive('session', id)} className="event-session-option">
-                        <Dots type="horizontal" />
-                      </div>
-                    </div>
-                    {(lessonMaterials || []).map((lesson, indexLesson) => {
-                      const {
-                        title: titleLesson,
-                        isRequired,
-                        isPreviewable,
-                        type,
-                        date,
-                        duration,
-                      } = lesson || {};
-                      const { hour, minute, second } = duration || {};
+                // listlessonRef.current[id] = lessonMaterials;
 
-                      return (
-                        <Fragment key={indexLesson}>
-                          {(optionActive.type === "lesson" && optionActive.id === indexLesson) && <DeleteOverlay onClick={() => handleDelete('lesson', indexLesson)} />}
-                          <div className="event-session-container-content">
-                            <div className="content-left">
-                              <Dots type="vertical" />
-                              <div className="content-video">
-                                {type === "video" ? (
-                                  <img src={Video} alt="video" />
-                                ) : (
-                                  <img src={onsite} alt="onsite" />
+                return (
+                  <Sortable
+                    key={index}
+                    listData={listSession}
+                    index={index}
+                    onChange={(sortedList) => setListSession(sortedList)}
+                    dragItem={dragSessionItem}
+                    dragOverItem={dragOverSessionItem}
+                  >
+                    <div className="event-session-container">
+                      {optionActive.type === "session" &&
+                        optionActive.id === id && (
+                          <DeleteOverlay
+                            onClick={() => handleDelete("session", id)}
+                          />
+                        )}
+                      <div className="event-session-container-title">
+                        <div className="left-wrap">
+                          <Dots type="vertical" />
+                          <p className="session-title">{title}</p>
+                          <img
+                            onClick={() => handleOpenEdit(id)}
+                            src={Pencil}
+                            alt="pencil"
+                          />
+                        </div>
+                        <div
+                          onClick={() => handleOpenOptionActive("session", id)}
+                          className="event-session-option"
+                        >
+                          <Dots type="horizontal" />
+                        </div>
+                      </div>
+                      {(listlessonRef?.current?.[id] || []).map((lesson, indexLesson) => {
+                        const {
+                          title: titleLesson,
+                          isRequired,
+                          type,
+                          date,
+                          duration,
+                        } = lesson || {};
+                        const { hour, minute, second } = duration || {};
+
+                        return (
+                          <Sortable
+                            key={indexLesson}
+                            listData={listlessonRef?.current?.[id]}
+                            index={indexLesson}
+                            onChange={(sortedList) =>
+                              listLessonCallBack({id, sortedList})
+                            }
+                            dragItem={dragLessonItem}
+                            dragOverItem={dragOverLessonItem}
+                          >
+                            {optionActive.type === "lesson" &&
+                              optionActive.id === indexLesson && (
+                                <DeleteOverlay
+                                  onClick={() =>
+                                    handleDelete("lesson", indexLesson)
+                                  }
+                                />
+                              )}
+                            <div ref={listLessonCallBack} className="event-session-container-content">
+                              <div className="content-left">
+                                <Dots type="vertical" />
+                                <div className="content-video">
+                                  {type === "video" ? (
+                                    <img src={Video} alt="video" />
+                                  ) : (
+                                    <img src={onsite} alt="onsite" />
+                                  )}
+                                </div>
+                                <p className="video-title">{titleLesson}</p>
+                                {isRequired && (
+                                  <div className="session-status">
+                                    <p>Required</p>
+                                  </div>
+                                )}
+                                {type === "video" && (
+                                  <>
+                                    <SingleDot />
+                                    <p className="video-previewable">
+                                      Previewable
+                                    </p>
+                                  </>
                                 )}
                               </div>
-                              <p className="video-title">{titleLesson}</p>
-                              {isRequired && (
-                                <div className="session-status">
-                                  <p>Required</p>
+                              <div className="content-right">
+                                <div className="content-clock">
+                                  <img src={TimeCircle} alt="clock" />
                                 </div>
-                              )}
-                              {type === "video" && (
-                                <>
+                                <p className="content-right-text content-date">
+                                  {dayjs(date).format("DD MMMM YYYY, HH:mm")}
+                                </p>
+                                <div className="single-dot-wrap">
                                   <SingleDot />
-                                  <p className="video-previewable">
-                                    Previewable
-                                  </p>
-                                </>
-                              )}
-                            </div>
-                            <div className="content-right">
-                              <div className="content-clock">
-                                <img src={TimeCircle} alt="clock" />
-                              </div>
-                              <p className="content-right-text content-date">
-                                {dayjs(date).format("DD MMMM YYYY, HH:mm")}
-                              </p>
-                              <div className="single-dot-wrap">
-                                <SingleDot />
-                              </div>
-                              <div className="content-clock">
-                                <img src={TimeCircle} alt="clock" />
-                              </div>
-                              <p className="content-right-text content-date">
-                                {hour && `${hour}:`}
-                                {minute ? `${minute}:` : "00:"}
-                                {second ? `${second}` : "00:"}{" "}
-                                {hour ? "Jam" : minute ? "Min" : "Detik"}
-                              </p>
-                              <div className="single-dot-wrap">
-                                <SingleDot />
-                              </div>
-                              <div className="content-download">
-                                <img src={Download} alt="download" />
-                              </div>
-                              <p className="content-right-text">Downloadable</p>
-                              <div onClick={() => {
-                                setSessionId(id)
-                                handleOpenOptionActive('lesson', indexLesson)
-                              }}  className="content-right-option">
-                                <Dots type="vertical-one-line" />
+                                </div>
+                                <div className="content-clock">
+                                  <img src={TimeCircle} alt="clock" />
+                                </div>
+                                <p className="content-right-text content-date">
+                                  {hour && `${hour}:`}
+                                  {minute ? `${minute}:` : "00:"}
+                                  {second ? `${second}` : "00:"}{" "}
+                                  {hour ? "Jam" : minute ? "Min" : "Detik"}
+                                </p>
+                                <div className="single-dot-wrap">
+                                  <SingleDot />
+                                </div>
+                                <div className="content-download">
+                                  <img src={Download} alt="download" />
+                                </div>
+                                <p className="content-right-text">
+                                  Downloadable
+                                </p>
+                                <div
+                                  onClick={() => {
+                                    setSessionId(id);
+                                    handleOpenOptionActive(
+                                      "lesson",
+                                      indexLesson
+                                    );
+                                  }}
+                                  className="content-right-option"
+                                >
+                                  <Dots type="vertical-one-line" />
+                                </div>
                               </div>
                             </div>
+                          </Sortable>
+                        );
+                      })}
+                      <div className="event-session-container-add-lesson">
+                        <Button
+                          onClick={() => handleOpenAddLesson(id)}
+                          variant="primary"
+                          width={33}
+                          height={31.57}
+                        >
+                          <div className="plus-icon">
+                            <img src={Plus} alt="plus" />
                           </div>
-                        </Fragment>
-                      );
-                    })}
-                    <div className="event-session-container-add-lesson">
-                      <Button
-                        onClick={() => handleOpenAddLesson(id)}
-                        variant="primary"
-                        width={33}
-                        height={31.57}
-                      >
-                        <div className="plus-icon">
-                          <img src={Plus} alt="plus" />
-                        </div>
-                      </Button>
-                      <p>Add Lesson Material</p>
+                        </Button>
+                        <p>Add Lesson Material</p>
+                      </div>
                     </div>
-                  </div>
+                  </Sortable>
                 );
               })}
               <div className="event-session-add-session">
