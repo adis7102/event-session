@@ -1,3 +1,5 @@
+export const URL = `http://localhost:4000/sessions`;
+
 export const lessonType = [
   {
     title: "Pilih Salah satu!",

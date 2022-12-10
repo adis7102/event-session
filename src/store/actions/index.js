@@ -68,3 +68,23 @@ export const editData = (url, id, body) => {
       .finally(() => dispatch(setLoading(false)));
   };
 };
+
+export const deleteData = (url, id) => {
+  return (dispatch) => {
+    dispatch(setLoading(true));
+
+    fetcher(`${url}/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      .then((data) => {
+        dispatch(getListData(url));
+      })
+      .catch((e) => {
+        console.error(e);
+      })
+      .finally(() => dispatch(setLoading(false)));
+  };
+};
