@@ -1,6 +1,24 @@
 import React, { useEffect, useState } from "react";
+import dayjs from "dayjs";
+
 import { useSelector, useDispatch } from "react-redux";
-import { getListData } from "../../store/actions/index.js";
+
+import { getListData, addData, editData } from "../../store/actions/index.js";
+import {
+  lessonType,
+  booleanRequirement,
+  sessionDefault,
+  lessonDefault,
+} from "../../constants/index.js";
+import { ValidateForm } from "../../helpers/index.js";
+
+import Modal from "react-bootstrap/Modal";
+
+import Input from "../../components/Input";
+import Dropdown from "../../components/Dropdown";
+import DatePicker from "../../components/DatePicker";
+import Duration from "../../components/Duration";
+import ErrorMessage from "../../components/ErrorMessage/index.jsx";
 
 import Pencil from "../../assets/icon-images/pencil.png";
 import Plus from "../../assets/icon-images/plus.png";
@@ -22,17 +40,104 @@ const EventSession = () => {
 
   const { loading, listData } = useSelector((state) => state);
 
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [dataForm, setDataForm] = useState({});
+  const [sessionId, setSessionId] = useState(null);
+  const [error, setError] = useState(null);
+
   useEffect(() => {
-    dispatch(
-      getListData(`http://localhost:4000/sessions`, {
-        method: "GET",
-      })
-    );
+    dispatch(getListData(`http://localhost:4000/sessions`));
   }, []);
 
-  console.log(listData, "ini nih");
+  const handleInput = (e) => {
+    const { value, name } = e.target;
 
-  const addLesson = () => {};
+    const cloneContent = JSON.parse(JSON.stringify(dataForm));
+
+    cloneContent[name] = value;
+
+    setDataForm(cloneContent);
+  };
+
+  const handleInputDuration = (e, name) => {
+    const { value, name: durationName } = e.target;
+
+    const cloneContent = JSON.parse(JSON.stringify(dataForm));
+
+    cloneContent[name][durationName] = value;
+
+    setDataForm(cloneContent);
+  };
+
+  const handleCloseAddModal = () => {
+    setShowAddModal(null);
+    setDataForm({});
+    setError(null);
+  };
+
+  const AddAction = () => {
+    const validate = ValidateForm(dataForm);
+
+    if (validate) {
+      setError(validate);
+    } else {
+      dispatch(addData(`http://localhost:4000/sessions`, dataForm));
+
+      handleCloseAddModal();
+    }
+  };
+
+  const EditAction = () => {
+    const validate = ValidateForm(dataForm);
+
+    if (validate) {
+      setError(validate);
+    } else {
+      if (showAddModal?.type === "session") {
+        dispatch(
+          editData(`http://localhost:4000/sessions`, dataForm?.id, dataForm)
+        );
+      } else {
+        const findItem = listData.find((el) => el.id === sessionId);
+        const cloneContent = JSON.parse(JSON.stringify(findItem));
+
+        cloneContent.lessonMaterials.push(dataForm);
+
+        dispatch(
+          editData(`http://localhost:4000/sessions`, sessionId, cloneContent)
+        );
+      }
+
+      handleCloseAddModal();
+    }
+  };
+
+  const handleOpenAddSession = () => {
+    setDataForm(sessionDefault);
+    setShowAddModal({
+      type: "session",
+      action: "add",
+    });
+  };
+
+  const handleOpenAddLesson = (id) => {
+    setSessionId(id);
+    setDataForm(lessonDefault);
+    setShowAddModal({
+      type: "lesson",
+      action: "add",
+    });
+  };
+
+  const handleOpenEdit = (id) => {
+    const findItem = listData.find((el) => el.id === id);
+
+    setDataForm(findItem);
+    setShowAddModal({
+      type: "session",
+      action: "edit",
+    });
+  };
 
   return (
     <div className="event-session">
@@ -41,13 +146,7 @@ const EventSession = () => {
           <h1>Belajar dan praktek cinematic videography</h1>
           <p>Last edited 18 October 2021 | 13:23</p>
         </div>
-        <Button
-          onClick={addLesson}
-          type="secondary"
-          width={130}
-          height={44}
-          position="right"
-        >
+        <Button variant="secondary" width={130} height={44} position="right">
           <div className="preview-button">
             <img src={Union} alt="Union" />
             Preview
@@ -68,7 +167,7 @@ const EventSession = () => {
           {!loading ? (
             <>
               {(listData || []).map((item, index) => {
-                const { title, lessonMaterials } = item || {};
+                const { id, title, lessonMaterials } = item || {};
 
                 return (
                   <div key={index} className="event-session-container">
@@ -76,78 +175,91 @@ const EventSession = () => {
                       <div className="left-wrap">
                         <Dots type="vertical" />
                         <p className="session-title">{title}</p>
-                        <img src={Pencil} alt="pencil" />
+                        <img
+                          onClick={() => handleOpenEdit(id)}
+                          src={Pencil}
+                          alt="pencil"
+                        />
                       </div>
                       <div className="event-session-option">
                         <Dots type="horizontal" />
                       </div>
                     </div>
-                    <div className="event-session-container-content">
-                      {(lessonMaterials || []).map((lesson, index) => {
-                        const {
-                          title: titleLesson,
-                          isRequired,
-                          isPreviewable,
-                          type,
-                          duration,
-                        } = lesson || {};
-                        const { hour, minute, second } = duration || {};
+                    {(lessonMaterials || []).map((lesson, indexLesson) => {
+                      const {
+                        title: titleLesson,
+                        isRequired,
+                        isPreviewable,
+                        type,
+                        date,
+                        duration,
+                      } = lesson || {};
+                      const { hour, minute, second } = duration || {};
 
-                        return (
-                          <>
-                            <div className="content-left">
-                              <Dots type="vertical" />
-                              <div className="content-video">
+                      return (
+                        <div
+                          key={indexLesson}
+                          className="event-session-container-content"
+                        >
+                          <div className="content-left">
+                            <Dots type="vertical" />
+                            <div className="content-video">
+                              {type === "video" ? (
                                 <img src={Video} alt="video" />
-                              </div>
-                              <p className="video-title">{titleLesson}</p>
-                              {isRequired && (
-                                <div className="session-status">
-                                  <p>Required</p>
-                                </div>
-                              )}
-                              {isPreviewable && (
-                                <>
-                                  <SingleDot />
-                                  <p className="video-previewable">
-                                    Previewable
-                                  </p>
-                                </>
+                              ) : (
+                                <img src={onsite} alt="onsite" />
                               )}
                             </div>
-                            <div className="content-right">
-                              <div className="content-clock">
-                                <img src={TimeCircle} alt="clock" />
+                            <p className="video-title">{titleLesson}</p>
+                            {isRequired && (
+                              <div className="session-status">
+                                <p>Required</p>
                               </div>
-                              <p className="content-right-text content-date">
-                                24 Oktober 2021, 16:30
-                              </p>
-                              <div className="single-dot-wrap">
+                            )}
+                            {type === 'video' && (
+                              <>
                                 <SingleDot />
-                              </div>
-                              <div className="content-clock">
-                                <img src={TimeCircle} alt="clock" />
-                              </div>
-                              <p className="content-right-text">06:30 Min</p>
-                              <div className="single-dot-wrap">
-                                <SingleDot />
-                              </div>
-                              <div className="content-download">
-                                <img src={Download} alt="download" />
-                              </div>
-                              <p className="content-right-text">Downloadable</p>
-                              <div className="content-right-option">
-                                <Dots type="vertical-one-line" />
-                              </div>
+                                <p className="video-previewable">Previewable</p>
+                              </>
+                            )}
+                          </div>
+                          <div className="content-right">
+                            <div className="content-clock">
+                              <img src={TimeCircle} alt="clock" />
                             </div>
-                          </>
-                        );
-                      })}
-                    </div>
+                            <p className="content-right-text content-date">
+                              {dayjs(date).format("DD MMMM YYYY, HH:mm")}
+                            </p>
+                            <div className="single-dot-wrap">
+                              <SingleDot />
+                            </div>
+                            <div className="content-clock">
+                              <img src={TimeCircle} alt="clock" />
+                            </div>
+                            <p className="content-right-text content-date">
+                              {hour && `${hour}:`}
+                              {minute ? `${minute}:` : '00:'}
+                              {second ? `${second}` : '00:'}{" "}
+                              {hour ? "Jam" : minute ? "Min" : "Detik"}
+                            </p>
+                            <div className="single-dot-wrap">
+                              <SingleDot />
+                            </div>
+                            <div className="content-download">
+                              <img src={Download} alt="download" />
+                            </div>
+                            <p className="content-right-text">Downloadable</p>
+                            <div className="content-right-option">
+                              <Dots type="vertical-one-line" />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                     <div className="event-session-container-add-lesson">
                       <Button
-                        onClick={addLesson}
-                        type="primary"
+                        onClick={() => handleOpenAddLesson(id)}
+                        variant="primary"
                         width={33}
                         height={31.57}
                       >
@@ -162,8 +274,8 @@ const EventSession = () => {
               })}
               <div className="event-session-add-session">
                 <Button
-                  onClick={addLesson}
-                  type="primary"
+                  onClick={() => handleOpenAddSession()}
+                  variant="primary"
                   width={161}
                   height={48}
                   position="right"
@@ -182,6 +294,113 @@ const EventSession = () => {
           )}
         </div>
       </div>
+      <Modal show={showAddModal} onHide={handleCloseAddModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {showAddModal?.action === "add" ? "Add " : "Edit "}
+            {showAddModal?.type === "session" ? "Session" : "Lesson Material"}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {error && <ErrorMessage message={error.errorField} />}
+          {showAddModal?.type === "session" && (
+            <div className="input-row">
+              <div className="input-item single">
+                <Input
+                  title="Session Title"
+                  name="title"
+                  value={dataForm?.title || ""}
+                  onChange={(e) => handleInput(e)}
+                />
+              </div>
+            </div>
+          )}
+          {showAddModal?.type === "lesson" && (
+            <>
+              <div className="input-row">
+                <div className="input-item">
+                  <Input
+                    title="Lesson Title"
+                    name="title"
+                    value={dataForm?.title || ""}
+                    onChange={(e) => handleInput(e)}
+                  />
+                </div>
+                <div className="input-item">
+                  <Dropdown
+                    title="Lesson Type"
+                    name="type"
+                    value={dataForm?.type || ""}
+                    onChange={(e) => handleInput(e)}
+                    options={lessonType}
+                  />
+                </div>
+              </div>
+              <div className="input-row">
+                <div className="input-item">
+                  <Dropdown
+                    title="Is it Required?"
+                    name="isRequired"
+                    value={dataForm?.isRequired || ""}
+                    onChange={(e) => handleInput(e)}
+                    options={booleanRequirement}
+                  />
+                </div>
+                <div className="input-item">
+                  <Dropdown
+                    title="Is it Downloadable?"
+                    name="isDownloadable"
+                    value={dataForm?.isDownloadable || ""}
+                    onChange={(e) => handleInput(e)}
+                    options={booleanRequirement}
+                  />
+                </div>
+              </div>
+              <div className="input-row">
+                <div className="input-item">
+                  <DatePicker
+                    title="Date"
+                    name="date"
+                    value={dataForm?.date || ""}
+                    onChange={(e) => handleInput(e)}
+                  />
+                </div>
+                <div className="input-item">
+                  <Duration
+                    title="Duration"
+                    name="duration"
+                    value={dataForm?.duration || ""}
+                    onChange={(e, name) => handleInputDuration(e, name)}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            width={100}
+            height={40}
+            variant="secondary"
+            onClick={() => handleCloseAddModal()}
+          >
+            Close
+          </Button>
+          <Button
+            width={100}
+            height={40}
+            type="submit"
+            variant="primary"
+            onClick={() =>
+              showAddModal?.action === "add" && showAddModal?.type === "session"
+                ? AddAction()
+                : EditAction()
+            }
+          >
+            Save
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

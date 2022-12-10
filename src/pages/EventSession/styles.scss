@@ -70,6 +70,7 @@
         border: 1px solid $color-border-gray;
         padding: 16px 24px 16.43px 10.22px;
         border-radius: 8px;
+        margin-bottom: 15px;
 
         &-title {
           display: flex;
@@ -91,6 +92,7 @@
             img {
               height: 14.54px;
               margin-left: 10.5px;
+              cursor: pointer;
             }
           }
 
@@ -180,8 +182,7 @@
             }
 
             .content-date {
-              margin-left: 8px;
-              margin-right: 16px;
+              margin-left: 8px !important;
             }
 
             .single-dot-wrap {
@@ -216,6 +217,8 @@
           .plus-icon {
             width: 17.22px;
             height: 17.22px;
+            display: grid;
+            place-items: center;
 
             img {
               width: 17.22px;
@@ -235,7 +238,7 @@
   }
 
   &-add-session {
-    margin-top: 27px;
+    margin: 27px 0;
     float: right;
 
     .add-session-button {
@@ -252,6 +255,29 @@
         img {
           width: 24px;
           height: 24px;
+        }
+      }
+    }
+  }
+}
+
+.modal-body {
+  .input-row {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 20px;
+
+    .input-item {
+      &:last-child {
+        margin-left: 25px;
+      }
+
+      &.single {
+        margin: 0;
+        width: 100%;
+
+        input {
+          width: 80%;
         }
       }
     }

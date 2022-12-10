@@ -1,28 +1,22 @@
 import React from 'react';
-import cn from 'classnames';
+
+import './styles.scss';
 
 const DatePicker = (props) => {
-  const { name, title, onChange, onReset, value } = props;
+  const { name, title, onChange, value } = props;
 
   return (
-    <div className="input">
+    <div className="datepicker">
       <p className="title">{title}</p>
       <div className="input-wrap">
         <input
-          type="date"
+          type="datetime-local"
           name={name}
-          onChange={(e) => onChange(e?.target?.value)}
+          onChange={(e) => onChange(e)}
           value={value}
-          data-testid="date-picker"
+          data-testid="datetime-local"
+          required
         />
-        <div
-          className={cn("reset-button", {
-            disabled: !value
-          })}
-          onClick={() => onReset()}
-        >
-          <p>reset date</p>
-        </div>
       </div>
     </div>
   )

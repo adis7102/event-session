@@ -1,17 +1,82 @@
 {
   "sessions": [
     {
-      "title": "session 1",
+      "id": 1,
+      "title": "session test edit",
       "lessonMaterials": [
         {
-          "title": "Judul 1",
-          "isRequired": true,
-          "isPreviewable": true,
+          "title": "asdwa",
+          "isRequired": "true",
+          "isDownloadable": false,
           "type": "video",
+          "date": "2022-12-11T16:02",
           "duration": {
-            "hour": 0,
-            "minute": 6,
-            "second": 30
+            "hour": null,
+            "minute": null,
+            "second": null
+          }
+        },
+        {
+          "title": "asdawd",
+          "isRequired": "true",
+          "isPreviewable": "true",
+          "isDownloadable": "true",
+          "type": "video",
+          "date": "2022-12-18T16:13",
+          "duration": {
+            "hour": null,
+            "minute": "10",
+            "second": null
+          }
+        },
+        {
+          "title": "asdwa",
+          "isRequired": "true",
+          "isPreviewable": "true",
+          "isDownloadable": "true",
+          "type": "video",
+          "date": "2022-12-11T16:14",
+          "duration": {
+            "hour": "01",
+            "minute": null,
+            "second": null
+          }
+        },
+        {
+          "title": "asdwa",
+          "isRequired": "true",
+          "isPreviewable": "false",
+          "isDownloadable": "true",
+          "type": "onsite",
+          "date": "2022-12-11T16:18",
+          "duration": {
+            "hour": null,
+            "minute": "10",
+            "second": null
+          }
+        },
+        {
+          "title": "asdwad",
+          "isRequired": "true",
+          "isDownloadable": "true",
+          "type": "video",
+          "date": "2022-12-11T16:21",
+          "duration": {
+            "hour": null,
+            "minute": "10",
+            "second": null
+          }
+        },
+        {
+          "title": "video",
+          "isRequired": "true",
+          "isDownloadable": "true",
+          "type": "onsite",
+          "date": "2022-12-11T16:21",
+          "duration": {
+            "hour": "01",
+            "minute": null,
+            "second": null
           }
         }
       ]

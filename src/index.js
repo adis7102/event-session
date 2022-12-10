@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import thunk from "redux-thunk";
+import "dayjs/locale/id";
 
 import { createStore, applyMiddleware } from "redux";
 import { Provider } from 'react-redux';
@@ -8,6 +9,8 @@ import rootReducer from "./store";
 
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const store = createStore(rootReducer, applyMiddleware(thunk));
 

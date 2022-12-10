@@ -1,17 +1,23 @@
-export const currencyFormatter = (number, country) => {
-  const currencies = {
-    "indonesia": {
-      lang: 'id-ID',
-      currency: 'IDR'
+export const ValidateForm  = (data) => {
+  let error = null;
+
+  for (const key in data) {
+    if(data[key] === null || data[key] === "") {
+      error = {
+        errorField: key
+      }
+
+      break;
+    } else if(data[key] === "duration") {
+      if(data[key]["duration"]["minute"] === null && data[key]["duration"]["hour"] === null) {
+        error = {
+          errorField: key
+        }
+  
+        break;
+      }
     }
   }
 
-  const formattedNumber = new Intl.NumberFormat(currencies[country]?.lang, {
-    style: 'currency',
-    currency: currencies[country]?.currency
-  })
-  .format(number)
-  .toString();
-
-  return formattedNumber.slice(0, formattedNumber.length - 3);
+  return error
 }

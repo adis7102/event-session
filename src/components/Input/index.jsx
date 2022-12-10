@@ -1,5 +1,7 @@
 import React from "react";
 
+import './styles.scss';
+
 const Input = (props) => {
   const { name, title, onChange, value } = props;
 
@@ -9,9 +11,10 @@ const Input = (props) => {
       <input
         type="text"
         name={name}
-        onChange={(e) => onChange(e?.target?.value)}
+        onChange={(e) => onChange(e)}
         value={value}
         data-testid="search-input"
+        required
       />
     </div>
   );
