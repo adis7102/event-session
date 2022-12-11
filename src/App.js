@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
 import Layout from "./components/Layout/index.jsx";
 import Navbar from "./components/Navbar";
@@ -11,10 +11,14 @@ function App() {
     <Router>
       <Navbar />
       <Layout>
-        <Routes>
-          <Route path="/" element={<EventSession />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Switch>
+          <Route exact path="/">
+            <EventSession />
+          </Route>
+          <Route path="*">
+            <NotFound />
+          </Route>
+        </Switch>
       </Layout>
     </Router>
   );

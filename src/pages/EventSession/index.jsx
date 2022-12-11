@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import dayjs from "dayjs";
+import arrayMove from "array-move";
 
 import { useSelector, useDispatch } from "react-redux";
 
@@ -17,6 +18,11 @@ import {
   lessonDefault,
 } from "../../constants/index.js";
 import { ValidateForm } from "../../helpers/index.js";
+import {
+  SortableContainer,
+  SortableItem,
+  DragHandle,
+} from "../../components/Sortable/Sortable";
 
 import Modal from "react-bootstrap/Modal";
 
@@ -26,7 +32,6 @@ import DatePicker from "../../components/DatePicker";
 import Duration from "../../components/Duration";
 import ErrorMessage from "../../components/ErrorMessage/index.jsx";
 import DeleteOverlay from "../../components/DeleteOverlay/index.jsx";
-import Sortable from "../../components/Sortable/index.jsx";
 
 import Pencil from "../../assets/icon-images/pencil.png";
 import Plus from "../../assets/icon-images/plus.png";
@@ -49,26 +54,11 @@ const EventSession = () => {
   const { loading, listData } = useSelector((state) => state);
 
   const [listSession, setListSession] = useState([]);
-  const [listLesson, setListLesson] = useState({});
   const [showAddModal, setShowAddModal] = useState(false);
   const [dataForm, setDataForm] = useState({});
   const [sessionId, setSessionId] = useState(null);
   const [error, setError] = useState(null);
   const [optionActive, setOptionActive] = useState({});
-
-  const dragSessionItem = useRef(null);
-  const dragOverSessionItem = useRef(null);
-  const listlessonRef = useRef({});
-  const listLessonCallBack = useCallback(node => {
-    if (node !== null) {
-      const { id, sortedList } = node || {};
-
-      listlessonRef.current[id] = sortedList;
-      setListLesson(listlessonRef.current)
-    }
-  },[listlessonRef]);
-  const dragLessonItem = useRef(null);
-  const dragOverLessonItem = useRef(null);
 
   useEffect(() => {
     dispatch(getListData(URL));
@@ -79,9 +69,6 @@ const EventSession = () => {
       setListSession(listData);
     }
   }, [listData]);
-
-  console.log(listlessonRef?.current?.[1], 'listlessonRef')
-  console.log(listLesson, 'listLesson')
 
   const handleInput = (e) => {
     const { value, name } = e.target;
@@ -196,11 +183,22 @@ const EventSession = () => {
     setOptionActive({});
     setSessionId(null);
   };
-  
-  // const handleSortedLesson = (index, sortedList) => {
-  //   listLessonRef.current[index] = []
-  // }
 
+  const onSortSession = ({ oldIndex, newIndex }) => {
+    let cloneContent = JSON.parse(JSON.stringify(listSession));
+    cloneContent = arrayMove(cloneContent, oldIndex, newIndex);
+
+    setListSession(cloneContent);
+  };
+
+  const onSortLesson= ({ oldIndex, newIndex }, indexSession) => {
+    let cloneContent = JSON.parse(JSON.stringify(listSession));
+
+    cloneContent[indexSession].lessonMaterials = arrayMove(cloneContent[indexSession].lessonMaterials, oldIndex, newIndex);
+
+    setListSession(cloneContent);
+  };
+  
   return (
     <div className="event-session">
       <div className="event-session-title-wrap">
@@ -227,21 +225,17 @@ const EventSession = () => {
             Event Schedule: 24 Oktober 2021, 16:30
           </div>
           {!loading ? (
-            <>
+            <SortableContainer
+              onSortEnd={(e) => onSortSession(e)}
+              axis="xy"
+              useDragHandle
+              useWindowAsScrollContainer
+            >
               {(listSession || []).map((item, index) => {
                 const { id, title, lessonMaterials } = item || {};
 
-                // listlessonRef.current[id] = lessonMaterials;
-
                 return (
-                  <Sortable
-                    key={index}
-                    listData={listSession}
-                    index={index}
-                    onChange={(sortedList) => setListSession(sortedList)}
-                    dragItem={dragSessionItem}
-                    dragOverItem={dragOverSessionItem}
-                  >
+                  <SortableItem key={index} index={index}>
                     <div className="event-session-container">
                       {optionActive.type === "session" &&
                         optionActive.id === id && (
@@ -251,7 +245,7 @@ const EventSession = () => {
                         )}
                       <div className="event-session-container-title">
                         <div className="left-wrap">
-                          <Dots type="vertical" />
+                          <DragHandle />
                           <p className="session-title">{title}</p>
                           <img
                             onClick={() => handleOpenEdit(id)}
@@ -266,105 +260,107 @@ const EventSession = () => {
                           <Dots type="horizontal" />
                         </div>
                       </div>
-                      {(listlessonRef?.current?.[id] || []).map((lesson, indexLesson) => {
-                        const {
-                          title: titleLesson,
-                          isRequired,
-                          type,
-                          date,
-                          duration,
-                        } = lesson || {};
-                        const { hour, minute, second } = duration || {};
+                      <SortableContainer
+                        className="brand-item-list"
+                        onSortEnd={(e) => onSortLesson(e, index)}
+                        axis="xy"
+                        useDragHandle
+                        useWindowAsScrollContainer
+                      >
+                        {(lessonMaterials || []).map((lesson, indexLesson) => {
+                          const {
+                            title: titleLesson,
+                            isRequired,
+                            type,
+                            date,
+                            duration,
+                          } = lesson || {};
+                          const { hour, minute, second } = duration || {};
 
-                        return (
-                          <Sortable
-                            key={indexLesson}
-                            listData={listlessonRef?.current?.[id]}
-                            index={indexLesson}
-                            onChange={(sortedList) =>
-                              listLessonCallBack({id, sortedList})
-                            }
-                            dragItem={dragLessonItem}
-                            dragOverItem={dragOverLessonItem}
-                          >
-                            {optionActive.type === "lesson" &&
-                              optionActive.id === indexLesson && (
-                                <DeleteOverlay
-                                  onClick={() =>
-                                    handleDelete("lesson", indexLesson)
-                                  }
-                                />
-                              )}
-                            <div ref={listLessonCallBack} className="event-session-container-content">
-                              <div className="content-left">
-                                <Dots type="vertical" />
-                                <div className="content-video">
-                                  {type === "video" ? (
-                                    <img src={Video} alt="video" />
-                                  ) : (
-                                    <img src={onsite} alt="onsite" />
+                          return (
+                            <SortableItem key={indexLesson} index={indexLesson}>
+                              {optionActive.type === "lesson" &&
+                                optionActive.id === indexLesson && (
+                                  <DeleteOverlay
+                                    onClick={() =>
+                                      handleDelete("lesson", indexLesson)
+                                    }
+                                  />
+                                )}
+                              <div
+                                key={indexLesson}
+                                className="event-session-container-content"
+                              >
+                                <div className="content-left">
+                                  <DragHandle />
+                                  <div className="content-video">
+                                    {type === "video" ? (
+                                      <img src={Video} alt="video" />
+                                    ) : (
+                                      <img src={onsite} alt="onsite" />
+                                    )}
+                                  </div>
+                                  <p className="video-title">{titleLesson}</p>
+                                  {isRequired && (
+                                    <div className="session-status">
+                                      <p>Required</p>
+                                    </div>
+                                  )}
+                                  {type === "video" && (
+                                    <>
+                                      <SingleDot />
+                                      <p className="video-previewable">
+                                        Previewable
+                                      </p>
+                                    </>
                                   )}
                                 </div>
-                                <p className="video-title">{titleLesson}</p>
-                                {isRequired && (
-                                  <div className="session-status">
-                                    <p>Required</p>
+                                <div className="content-right">
+                                  <div className="content-clock">
+                                    <img src={TimeCircle} alt="clock" />
                                   </div>
-                                )}
-                                {type === "video" && (
-                                  <>
+                                  <p className="content-right-text content-date">
+                                    {dayjs(date).format("DD MMMM YYYY, HH:mm")}
+                                  </p>
+                                  <div className="single-dot-wrap">
                                     <SingleDot />
-                                    <p className="video-previewable">
-                                      Previewable
-                                    </p>
-                                  </>
-                                )}
-                              </div>
-                              <div className="content-right">
-                                <div className="content-clock">
-                                  <img src={TimeCircle} alt="clock" />
-                                </div>
-                                <p className="content-right-text content-date">
-                                  {dayjs(date).format("DD MMMM YYYY, HH:mm")}
-                                </p>
-                                <div className="single-dot-wrap">
-                                  <SingleDot />
-                                </div>
-                                <div className="content-clock">
-                                  <img src={TimeCircle} alt="clock" />
-                                </div>
-                                <p className="content-right-text content-date">
-                                  {hour && `${hour}:`}
-                                  {minute ? `${minute}:` : "00:"}
-                                  {second ? `${second}` : "00:"}{" "}
-                                  {hour ? "Jam" : minute ? "Min" : "Detik"}
-                                </p>
-                                <div className="single-dot-wrap">
-                                  <SingleDot />
-                                </div>
-                                <div className="content-download">
-                                  <img src={Download} alt="download" />
-                                </div>
-                                <p className="content-right-text">
-                                  Downloadable
-                                </p>
-                                <div
-                                  onClick={() => {
-                                    setSessionId(id);
-                                    handleOpenOptionActive(
-                                      "lesson",
-                                      indexLesson
-                                    );
-                                  }}
-                                  className="content-right-option"
-                                >
-                                  <Dots type="vertical-one-line" />
+                                  </div>
+                                  <div className="content-clock">
+                                    <img src={TimeCircle} alt="clock" />
+                                  </div>
+                                  <p className="content-right-text content-date">
+                                    {hour && `${hour}:`}
+                                    {minute ? `${minute}:` : "00:"}
+                                    {second ? `${second}` : "00:"}{" "}
+                                    {hour ? "Jam" : minute ? "Min" : "Detik"}
+                                  </p>
+                                  <div className="single-dot-wrap">
+                                    <SingleDot />
+                                  </div>
+                                  <div className="content-download">
+                                    <img src={Download} alt="download" />
+                                  </div>
+                                  <p className="content-right-text">
+                                    Downloadable
+                                  </p>
+                                  <div
+                                    onClick={() => {
+                                      setSessionId(id);
+                                      handleOpenOptionActive(
+                                        "lesson",
+                                        indexLesson
+                                      );
+                                    }}
+                                    className="content-right-option"
+                                  >
+                                    <Dots type="vertical-one-line" />
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </Sortable>
-                        );
-                      })}
+                            </SortableItem>
+                          );
+                        })}
+                      </SortableContainer>
                       <div className="event-session-container-add-lesson">
                         <Button
                           onClick={() => handleOpenAddLesson(id)}
@@ -379,7 +375,7 @@ const EventSession = () => {
                         <p>Add Lesson Material</p>
                       </div>
                     </div>
-                  </Sortable>
+                  </SortableItem>
                 );
               })}
               <div className="event-session-add-session">
@@ -398,7 +394,7 @@ const EventSession = () => {
                   </div>
                 </Button>
               </div>
-            </>
+            </SortableContainer>
           ) : (
             <h3>Loading the data ...</h3>
           )}

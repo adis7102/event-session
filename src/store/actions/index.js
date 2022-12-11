@@ -52,8 +52,6 @@ export const editData = (url, id, body) => {
   return (dispatch) => {
     dispatch(setLoading(true));
 
-    console.log(url, id, body)
-
     fetcher(`${url}/${id}`, {
       method: "PATCH",
       headers: {

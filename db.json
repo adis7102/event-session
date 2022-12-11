@@ -41,29 +41,6 @@
         }
       ],
       "id": 1
-    },
-    {
-      "title": "2",
-      "lessonMaterials": [
-        {
-          "title": "asdaw",
-          "isRequired": "true",
-          "isDownloadable": "false",
-          "type": "video",
-          "date": "2022-12-11T22:32",
-          "duration": {
-            "hour": null,
-            "minute": "10",
-            "second": null
-          }
-        }
-      ],
-      "id": 2
-    },
-    {
-      "title": "3",
-      "lessonMaterials": [],
-      "id": 3
     }
   ]
 }
