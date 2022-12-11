@@ -1,70 +1,53 @@
-# Getting Started with Create React App
+# EVENT SESSION
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+EVENT SESSION is a web that contain list of users of sessions.
 
-## Available Scripts
+This web is using `REACT.JS` and `json-server`.
 
-In the project directory, you can run:
+In this page you can:
+* Add new Session
+* Add new Lesson
+* Delete Session
+* Delete Lesson
+* Sort Session by drag and dropping the card
+* Sort Lesson by drag and dropping the lesson
 
-### `npm start`
+## Table of Contents
+1. [Requirements](#requirements)
+2. [Getting Started](#getting-started)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Requirements
+* node `v14.15.1 (LTS)`
+* npm `6.14.9`
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
 
-### `npm test`
+## Getting Started
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+After confirming that your development environment meets the specified [requirements](#requirements),
+you can start the site by running these commands:
 
-### `npm run build`
+```bash
+$ npm install                   # Install project dependencies
+$ npm run dev                     # Compile and launch on development environment
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+This web app is using `json-server` to mock the API.
+Therefore you will need to run the `json-server` before starting the app.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+first you have to open the second terminal in your command line,
+And then start the `json-server` by running this command:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+`npm run start-server`
 
-### `npm run eject`
+To run the `REACT JS` you simply only need to run:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+`npm run start`
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+While developing, you will probably rely mostly on `npm run start`; however, there are additional scripts at your disposal:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+|`npm run <script>`|Description|
+|------------------|-----------|
+|`start` |Serves your app at `localhost:3000`.|
+|`start-server` |Serves your `json-server` at `localhost:4000`.|
+|`build`|Compiles the application for deployment purpose.|
+|`test`|Runs all tests in sequence|
