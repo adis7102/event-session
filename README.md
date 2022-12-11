@@ -1,6 +1,6 @@
 # EVENT SESSION
 
-EVENT SESSION is a web that contain list of users of sessions.
+EVENT SESSION is a web that contain list of sessions.
 
 This web is using `REACT.JS` and `json-server`.
 
